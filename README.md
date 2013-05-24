@@ -14,11 +14,11 @@ This allows you to quickly track which domains and apps are active and which are
 
 To use the Auditor, cd into the cloned repo and run the following command:
 
-	ruby ./lib/ip_auditor.rb [server name/IP] [user] [password]
+	ruby ./lib/ip_auditor.rb [server name/IP] [port] [user] [password]
 
 Example:
 
-	ruby ./lib/ip_auditor.rb someserver.com myuser secret
+	ruby ./lib/ip_auditor.rb someserver.com 8022 myuser secret
 
 ## Output
 

@@ -4,10 +4,11 @@ require 'net/ssh'
 module IpAuditor
   # puts ARGV[0]
   server = ARGV[0] || ''
-  user = ARGV[1] || ''
-  pass = ARGV[2] || ''
+  port = ARGV[1] || 22
+  user = ARGV[2] || ''
+  pass = ARGV[3] || ''
 
-  Net::SSH.start(server, user, password: pass) do |ssh|
+  Net::SSH.start(server, user, {port: port, password: pass}) do |ssh|
 
     # find lines of interest in vhosts, assumes location is /etc/apache2/sites-enabled
     domain_text = ssh.exec!("grep -r '<VirtualHost\\|DocumentRoot\\|ServerName\\|ServerAlias' /etc/apache2/sites-enabled")
