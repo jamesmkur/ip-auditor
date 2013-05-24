@@ -4,8 +4,8 @@ require File.expand_path('../lib/ip_auditor/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["James"]
   gem.email         = ["james@finedesigngroup.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.description   = "IP Auditor"
+  gem.summary       = "Audits Apache vhosts and domain IPs"
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($\)
@@ -14,4 +14,6 @@ Gem::Specification.new do |gem|
   gem.name          = "ip_auditor"
   gem.require_paths = ["lib"]
   gem.version       = IpAuditor::VERSION
+
+  gem.add_dependency "net-ssh", "~> 2.6.7"
 end
