@@ -1,8 +1,8 @@
 # IP Auditor
 
-The IP Auditor looks through your Apache vhosts to compile a list of apps on the server, what domains are being listened for and what IP the domain is actually pointing to.
+The IP Auditor looks through your Apache vhosts to compile a list of apps on the server, what domains are being listened for and what IP each domain is actually pointing to.
 
-This allows you to quickly track which domains are active and which domains are point elsewhere.
+This allows you to quickly track which domains and apps are active and which are pointing elsewhere.
 
 ## Installation
 
@@ -38,7 +38,7 @@ The Auditor will return a crude report for each VirtualHost in the following for
 * release as a Gem (currently you have to clone repo and run ruby script)
 * prompt user for password instead vs entering it with main command
 
-## Licence
+## License
 
 Copyright (c) 2013 James Kurczodyna
 
