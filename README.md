@@ -1,29 +1,6 @@
-# IpAuditor
+# IP Auditor
 
-TODO: Write a gem description
+## Goals
 
-## Installation
+The goal behind the IP Auditor is to be an installable Gem that runs locally with SSH credentials to a server. It then returns a list of all domains the server is listening for and what IP the domains are acutally pointing to.
 
-Add this line to your application's Gemfile:
-
-    gem 'ip_auditor'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install ip_auditor
-
-## Usage
-
-TODO: Write usage instructions here
-
-## Contributing
-
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Added some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
