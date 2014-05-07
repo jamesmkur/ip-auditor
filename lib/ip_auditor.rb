@@ -1,12 +1,24 @@
 # require "ip_auditor/version"
 require 'net/ssh'
 
+begin
+  require 'io/console'
+rescue LoadError
+end
+
 module IpAuditor
-  # puts ARGV[0]
+
   server = ARGV[0] || ''
   port = ARGV[1] || 22
   user = ARGV[2] || ''
-  pass = ARGV[3] || ''
+
+  if STDIN.respond_to?(:noecho)
+    puts "Password: "
+    pass = STDIN.noecho(&:gets).chomp
+  else
+    pass = `read -s -p "Password: " password; echo $password`.chomp
+  end
+
 
   Net::SSH.start(server, user, {port: port, password: pass}) do |ssh|
 

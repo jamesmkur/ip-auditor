@@ -36,7 +36,6 @@ The Auditor will return a crude report for each VirtualHost in the following for
 ## TODO
 
 * release as a Gem (currently you have to clone repo and run ruby script)
-* prompt user for password instead vs entering it with main command
 
 ## License
 
