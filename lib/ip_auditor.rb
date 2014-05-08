@@ -143,7 +143,6 @@ module IpAuditor
       # if we're still looking at the same file, get information
       if line[current_file_path]
         virtual_host = line[/<VirtualHost/] ? line[/<VirtualHost (.*)>/,1].strip.split(" ").join(", ") : virtual_host
-        puts "virtual_host: #{virtual_host}"
         directory = line[/DocumentRoot/] ? line[/DocumentRoot\s*?"?(.*)"?/,1] : directory
 
         domain = line[/(ServerName|ServerAlias)(.*)/] ? line[/(ServerName|ServerAlias)(.*)/,2].strip : nil
