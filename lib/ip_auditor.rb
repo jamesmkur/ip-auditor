@@ -61,11 +61,11 @@ module IpAuditor
   # prompt for and return password
   def IpAuditor.get_password
     if STDIN.respond_to?(:noecho)
-    puts "Password: "
-    STDIN.noecho(&:gets).chomp
-  else
-    `read -s -p "Password: " password; echo $password`.chomp
-  end
+      puts "Password: "
+      STDIN.noecho(&:gets).chomp
+    else
+      `read -s -p "Password: " password; echo $password`.chomp
+    end
   end
 
   # get and parse the yaml passenger config file if available, else return false
@@ -102,15 +102,20 @@ module IpAuditor
 
     rails_info = get_passenger_file(ssh,file_name)
 
-    if rails_info
+    # only return info if we're looking for this environment. Return false if rails info exists but
+    # we should ignore this environment, nil if there is no rails info
+    if rails_info && (rails_info['environment'][@options.environment] || @options.environment == 'all')
       rails_info['rails_version'] = get_rails_version(ssh,rails_info['rvm'])
       return rails_info
-    else
+    elsif rails_info
       return false
+    else
+      return nil
     end
 
   end
 
+  # use nslookup to get the IP of a given domain
   def IpAuditor.check_site_status(domain)
     lookup = `nslookup #{domain}`
 
@@ -126,6 +131,7 @@ module IpAuditor
     end
   end
 
+  # get and compile information from /etc/apache2/sites-enabled
   def IpAuditor.get_site_information(ssh)
     data = []
     current_file_path = '--'
@@ -142,13 +148,19 @@ module IpAuditor
 
       # if we're still looking at the same file, get information
       if line[current_file_path]
-        virtual_host = line[/<VirtualHost/] ? line[/<VirtualHost (.*)>/,1].strip.split(" ").join(", ") : virtual_host
-        directory = line[/DocumentRoot/] ? line[/DocumentRoot\s*?"?(.*)"?/,1] : directory
 
-        domain = line[/(ServerName|ServerAlias)(.*)/] ? line[/(ServerName|ServerAlias)(.*)/,2].strip : nil
+        domain = nil
 
-        if !(domain.nil?)
+        # if line contains a domain, get its status
+        if line[/(ServerName|ServerAlias)(.*)/]
+          domain = line[/(ServerName|ServerAlias)(.*)/,2].strip
           domain_statuses << [domain,IpAuditor.check_site_status(domain)]
+
+        elsif line[/<VirtualHost/]
+          virtual_host = line[/<VirtualHost (.*)>/,1].strip.split(" ").join(", ")
+
+        elsif line[/DocumentRoot/]
+          directory = line[/DocumentRoot\s*?"?(.*)"?/,1]
         end
 
       else
@@ -156,9 +168,10 @@ module IpAuditor
         if !(current_file.nil?)
           rails_info = IpAuditor.get_rails_information(ssh,current_file)
 
-          if rails_info && (rails_info['environment'][@options.environment] || @options.environment == 'all')
+          # if it has rails info an dit's for the relavant domains
+          if rails_info
             data << [current_file, rails_info['environment'], rails_info['cwd'], rails_info['rvm'], rails_info['rails_version'], virtual_host,domain_statuses].flatten
-          elsif @options.environment == 'all'
+          elsif rails_info.nil?
             data << [current_file,'',directory,'','',virtual_host,domain_statuses].flatten
           end
         end

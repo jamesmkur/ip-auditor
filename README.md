@@ -38,7 +38,7 @@ The Auditor will return a crude report for each VirtualHost in the following for
 * -p [PORT NUMBER] : Specify a port number (default is 22)
 * -c [FILE NAME (optional)]: Output to .csv file instead of terminal (can specify a name)
 * -v : Output more information as to what's happening
-* -e [prod|stage|dev|etc.]: Specify an environment to output (defaults to 'all'; determined by passenger config files)
+* -e [prod|stage|dev|etc.]: Specify an environment to output (defaults to 'all'; determined by passenger config files, so non-rails site will always return)
 
 ## TODO
 
