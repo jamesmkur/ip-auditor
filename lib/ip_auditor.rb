@@ -167,7 +167,6 @@ module IpAuditor
         current_file_path = line[/(.*?):/,1]
         current_file = current_file_path[/.*\/(.*?\.com$)/,1]
         virtual_host = line[/<VirtualHost/] ? line[/<VirtualHost (.*)>/,1].strip.split(" ").join(", ") : ''
-        virtualhost = ''
         directory = ''
         domain_statuses = []
 
@@ -227,36 +226,33 @@ module IpAuditor
       # output to terminal
       else
 
-        # loop trough each line of results
-        domain_text.each_line do |line|
-          # output VirtualHost
-          puts "\n============\n"+line+"============" if line[/<VirtualHost/]
-          # output DocumentRoot
-          puts line.scan(/DocumentRoot(.*)/).to_a[0][0].strip if line['DocumentRoot']
+        data_headers = ['Site','Environment','Directory','Gemset','Rails Version','Virtual Host','Site Statuses']
+        site_data = IpAuditor.get_site_information(ssh)
 
-          # if line is a ServerName or ServerAlias
-          domain_line = line.scan(/(ServerName|ServerAlias)(.*)/).to_a
-          if domain_line[0]
-            # pull out domains and loop through them
-            domains = domain_line[0][1].strip.split(' ')
-            domains.each do |domain|
-              # output domain
-              puts domain if domain
-              # perform an nslookup
-              lookup = `nslookup #{domain}`
+        last_header_index = data_headers.length - 1
 
-              # strip output to IPs only
-              output = lookup.scan(/(Non-authoritative answer:)(.*)/m).to_a
-              ips = output[0][1].scan(/Address: (.*)/).to_a if output[0]
+        site_data.each do |site|
 
-              # output results
-              if ips
-                puts ips
+          puts "\n============\n#{site[0]}\n============"
+
+
+          (1...site.length).each do |index|
+            if site[index] =~ /[^[:space:]]/
+
+              if !data_headers[index].nil? && index < last_header_index
+                puts "#{data_headers[index]}: #{site[index]}"
+
+              elsif index == last_header_index
+                puts "------------\n#{data_headers[index]}------------"
+                puts site[index]
               else
-                puts 'DOMAIN LOOKUP FAILED'
+                puts site[index]
               end
+
             end
+
           end
+
         end
 
       end
