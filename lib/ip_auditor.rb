@@ -193,7 +193,7 @@ module IpAuditor
 
     site_data.each do |site|
 
-      puts "\n============\n#{site[0]}\n============"
+      puts "\n\n============\n#{site[0]}\n============"
 
 
       (1...site.length).each do |index|
@@ -203,7 +203,7 @@ module IpAuditor
             puts "#{headers[index]}: #{site[index]}"
 
           elsif index == last_header_index
-            puts "------------\n#{headers[index]}------------"
+            puts "------------\n#{headers[index]}\n------------"
             puts site[index]
           else
             puts site[index]
@@ -227,7 +227,7 @@ module IpAuditor
     # open an ssh connection
     Net::SSH.start(@options.server, @options.user, {port: @options.port, password: @options.pass}) do |ssh|
 
-      puts "Connection opened! Finding and parsing apache/passenger files..."
+      puts "Connection opened! Finding and parsing apache/passenger files (this may take a while)..."
 
       # find lines of interest in vhosts, assumes location is /etc/apache2/sites-enabled
       domain_text = ssh.exec!("grep -r '<VirtualHost\\|DocumentRoot\\|<Directory\\|ServerName\\|ServerAlias' /etc/apache2/sites-enabled")
