@@ -14,11 +14,11 @@ This allows you to quickly track which domains and apps are active and which are
 
 To use the Auditor, cd into the cloned repo and run the following command:
 
-	ruby ./lib/ip_auditor.rb [server name/IP] [port] [user] [password]
+	ruby ./lib/ip_auditor.rb [server name/IP] [user] [options]
 
 Example:
 
-	ruby ./lib/ip_auditor.rb someserver.com 8022 myuser secret
+	ruby ./lib/ip_auditor.rb someserver.com myuser
 
 ## Output
 
@@ -33,10 +33,16 @@ The Auditor will return a crude report for each VirtualHost in the following for
 	[IP domain-2 is actually pointing to]
 	[/path/to/app/DocumentRoot]
 
+## Options
+
+* -p [PORT NUMBER] : Specify a port number (default is 22)
+* -c [FILE NAME (optional)]: Output to .csv file instead of terminal (can specify a name)
+* -v : Output more information as to what's happening
+* -e [prod|stage|dev|etc.]: Specify an environment to output (defaults to 'all'; determined by passenger config files, so non-rails site will always return)
+
 ## TODO
 
 * release as a Gem (currently you have to clone repo and run ruby script)
-* prompt user for password instead vs entering it with main command
 
 ## License
 
