@@ -188,72 +188,70 @@ module IpAuditor
     end
   end
 
+  def IpAuditor.write_to_terminal(headers,site_data)
+    last_header_index = headers.length - 1
+
+    site_data.each do |site|
+
+      puts "\n============\n#{site[0]}\n============"
+
+
+      (1...site.length).each do |index|
+        if site[index] =~ /[^[:space:]]/
+
+          if !headers[index].nil? && index < last_header_index
+            puts "#{headers[index]}: #{site[index]}"
+
+          elsif index == last_header_index
+            puts "------------\n#{headers[index]}------------"
+            puts site[index]
+          else
+            puts site[index]
+          end
+        end
+      end
+
+    end
+  end
+
 
 
 
   # set the options for this instance
   IpAuditor.set_options
 
-  puts "Opening SSH connection to #{@options.server}..." if @options.verbose
+  puts "Opening SSH connection to #{@options.server}..."
 
   begin
 
     # open an ssh connection
     Net::SSH.start(@options.server, @options.user, {port: @options.port, password: @options.pass}) do |ssh|
 
-      puts "Connection opened! Finding apache site files..." if @options.verbose
+      puts "Connection opened! Finding and parsing apache/passenger files..."
 
       # find lines of interest in vhosts, assumes location is /etc/apache2/sites-enabled
       domain_text = ssh.exec!("grep -r '<VirtualHost\\|DocumentRoot\\|<Directory\\|ServerName\\|ServerAlias' /etc/apache2/sites-enabled")
+
+      headers = ['Site','Environment','Directory','Gemset','Rails Version','Virtual Host','Site Statuses']
+
+      puts "Parsing the vhosts files ..." if @options.verbose
+      site_data = IpAuditor.get_site_information(ssh)
+
+
 
 
       # output to .csv file
       if !@options.csv.nil? && @options.csv
 
-
-        puts "Parsing the vhosts files ..." if @options.verbose
-
-        csv_headers = ['Site','Environment','Directory','Gemset','Rails Version','Virtual Host','Site Statuses']
-        csv_data = IpAuditor.get_site_information(ssh)
-
         puts "Writing to .csv file..." if @options.verbose
-        IpAuditor.write_to_csv(csv_headers,csv_data)
+        IpAuditor.write_to_csv(headers,site_data)
 
         puts "File saved to ./IP Audit - #{@options.csv_name}.csv!"
 
 
-
       # output to terminal
       else
-
-        data_headers = ['Site','Environment','Directory','Gemset','Rails Version','Virtual Host','Site Statuses']
-        site_data = IpAuditor.get_site_information(ssh)
-
-        last_header_index = data_headers.length - 1
-
-        site_data.each do |site|
-
-          puts "\n============\n#{site[0]}\n============"
-
-
-          (1...site.length).each do |index|
-            if site[index] =~ /[^[:space:]]/
-
-              if !data_headers[index].nil? && index < last_header_index
-                puts "#{data_headers[index]}: #{site[index]}"
-
-              elsif index == last_header_index
-                puts "------------\n#{data_headers[index]}------------"
-                puts site[index]
-              else
-                puts site[index]
-              end
-
-            end
-
-          end
-
-        end
+        IpAuditor.write_to_terminal(headers,site_data)
 
       end
 
@@ -264,8 +262,8 @@ module IpAuditor
     puts "Socket Error! Is your domain name correct?"
   rescue Net::SSH::AuthenticationFailed
     puts "Authentication Error! Did you correctly type in your username and password?"
-  # rescue Exception => e
-  #   puts "Error! Have you specified the correct port, perhaps?"
+  rescue Exception => e
+    puts "Error! Have you specified the correct port? Or maybe there's a problem with the code..."
   end
 
 end
