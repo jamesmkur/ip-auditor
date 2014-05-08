@@ -131,7 +131,7 @@ module IpAuditor
     current_file_path = '--'
     current_file = nil
     directory = ''
-    virtualhost = ''
+    virtual_host = ''
     domain_statuses = []
 
     # get all relevant lines from vhost files
@@ -143,7 +143,8 @@ module IpAuditor
       # if we're still looking at the same file, get information
       if line[current_file_path]
         virtual_host = line[/<VirtualHost/] ? line[/<VirtualHost (.*)>/,1].strip.split(" ").join(", ") : virtual_host
-        directory = line[/DocumentRoot/] ? line[/DocumentRoot\s*?(.*)/,1] : directory
+        puts "virtual_host: #{virtual_host}"
+        directory = line[/DocumentRoot/] ? line[/DocumentRoot\s*?"?(.*)"?/,1] : directory
 
         domain = line[/(ServerName|ServerAlias)(.*)/] ? line[/(ServerName|ServerAlias)(.*)/,2].strip : nil
 
