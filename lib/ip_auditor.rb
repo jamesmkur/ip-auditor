@@ -111,8 +111,19 @@ module IpAuditor
 
   end
 
-  def IpAuditor.check_site_status
+  def IpAuditor.check_site_status(domain)
+    lookup = `nslookup #{domain}`
 
+    # strip output to IPs only
+    output = lookup[/Non-authoritative answer:(.*)/m,1]
+    ip = !output.nil? ? output[/Address: (.*)/m,1] : false
+
+    # output IP address or message saying lookup failed
+    if ip
+      return ip
+    else
+      return 'DOMAIN LOOKUP FAILED'
+    end
   end
 
   def IpAuditor.get_site_information(ssh)
@@ -121,6 +132,7 @@ module IpAuditor
     current_file = nil
     directory = ''
     virtualhost = ''
+    domain_statuses = []
 
     # get all relevant lines from vhost files
     domain_text = ssh.exec!("grep -r '<VirtualHost\\|DocumentRoot\\|<Directory\\|ServerName\\|ServerAlias' /etc/apache2/sites-enabled")
@@ -133,15 +145,21 @@ module IpAuditor
         virtual_host = line[/<VirtualHost/] ? line[/<VirtualHost (.*)>/,1].strip.split(" ").join(", ") : virtual_host
         directory = line[/DocumentRoot/] ? line[/DocumentRoot\s*?(.*)/,1] : directory
 
+        domain = line[/(ServerName|ServerAlias)(.*)/] ? line[/(ServerName|ServerAlias)(.*)/,2].strip : nil
+
+        if !(domain.nil?)
+          domain_statuses << [domain,IpAuditor.check_site_status(domain)]
+        end
+
       else
         # if this is a new file, get rails info and push into data array before resetting variables
         if !(current_file.nil?)
           rails_info = IpAuditor.get_rails_information(ssh,current_file)
 
           if rails_info && (rails_info['environment'][@options.environment] || @options.environment == 'all')
-            data << [current_file, rails_info['environment'], rails_info['cwd'], rails_info['rvm'], rails_info['rails_version'], virtual_host]
+            data << [current_file, rails_info['environment'], rails_info['cwd'], rails_info['rvm'], rails_info['rails_version'], virtual_host,domain_statuses].flatten
           elsif @options.environment == 'all'
-            data << [current_file,'',directory,'','',virtual_host]
+            data << [current_file,'',directory,'','',virtual_host,domain_statuses].flatten
           end
         end
 
@@ -151,6 +169,7 @@ module IpAuditor
         virtual_host = line[/<VirtualHost/] ? line[/<VirtualHost (.*)>/,1].strip.split(" ").join(", ") : ''
         virtualhost = ''
         directory = ''
+        domain_statuses = []
 
       end
     end
@@ -195,7 +214,7 @@ module IpAuditor
 
         puts "Parsing the vhosts files ..." if @options.verbose
 
-        csv_headers = ['Site','Environment','Directory','Gemset','Rails Version','Virtual Host']
+        csv_headers = ['Site','Environment','Directory','Gemset','Rails Version','Virtual Host','Site Statuses']
         csv_data = IpAuditor.get_site_information(ssh)
 
         puts "Writing to .csv file..." if @options.verbose
