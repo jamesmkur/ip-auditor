@@ -40,13 +40,7 @@ The Auditor will return a crude report for each VirtualHost in the following for
 * -v : Output more information as to what's happening
 * -e [prod|stage|dev|etc.]: Specify an environment to output (defaults to 'all'; determined by passenger config files, so non-rails site will always return)
 
-## TODO
-
-* release as a Gem (currently you have to clone repo and run ruby script)
-
 ## License
-
-Copyright (c) 2013 James Kurczodyna
 
 MIT License
 

@@ -228,55 +228,57 @@ module IpAuditor
   end
 
 
+  def IpAuditor.audit
+
+    # set the options for this instance
+    IpAuditor.set_options
+
+    puts "Opening SSH connection to #{@options.server}..."
+
+    begin
+
+      # open an ssh connection
+      Net::SSH.start(@options.server, @options.user, {port: @options.port, password: @options.pass}) do |ssh|
+
+        puts "Connection opened! Finding and parsing apache/passenger files (this may take a while)..."
+
+        # find lines of interest in vhosts, assumes location is /etc/apache2/sites-enabled
+        domain_text = ssh.exec!("grep -r '<VirtualHost\\|DocumentRoot\\|<Directory\\|ServerName\\|ServerAlias' /etc/apache2/sites-enabled")
+
+        headers = ['Site','Environment','Directory','Gemset','Rails Version','Virtual Host','Site Statuses']
+
+        puts "Parsing the vhosts files ..." if @options.verbose
+        site_data = IpAuditor.get_site_information(ssh)
 
 
-  # set the options for this instance
-  IpAuditor.set_options
-
-  puts "Opening SSH connection to #{@options.server}..."
-
-  begin
-
-    # open an ssh connection
-    Net::SSH.start(@options.server, @options.user, {port: @options.port, password: @options.pass}) do |ssh|
-
-      puts "Connection opened! Finding and parsing apache/passenger files (this may take a while)..."
-
-      # find lines of interest in vhosts, assumes location is /etc/apache2/sites-enabled
-      domain_text = ssh.exec!("grep -r '<VirtualHost\\|DocumentRoot\\|<Directory\\|ServerName\\|ServerAlias' /etc/apache2/sites-enabled")
-
-      headers = ['Site','Environment','Directory','Gemset','Rails Version','Virtual Host','Site Statuses']
-
-      puts "Parsing the vhosts files ..." if @options.verbose
-      site_data = IpAuditor.get_site_information(ssh)
 
 
+        # output to .csv file
+        if !@options.csv.nil? && @options.csv
+
+          puts "Writing to .csv file..." if @options.verbose
+          IpAuditor.write_to_csv(headers,site_data)
+
+          puts "File saved to ./IP Audit - #{@options.csv_name}.csv!"
 
 
-      # output to .csv file
-      if !@options.csv.nil? && @options.csv
+        # output to terminal
+        else
+          IpAuditor.write_to_terminal(headers,site_data)
 
-        puts "Writing to .csv file..." if @options.verbose
-        IpAuditor.write_to_csv(headers,site_data)
-
-        puts "File saved to ./IP Audit - #{@options.csv_name}.csv!"
-
-
-      # output to terminal
-      else
-        IpAuditor.write_to_terminal(headers,site_data)
+        end
 
       end
 
+      # catch the basic errors
+    rescue SocketError => e
+      puts "Socket Error! Is your domain name correct?"
+    rescue Net::SSH::AuthenticationFailed
+      puts "Authentication Error! Did you correctly type in your username and password?"
+    rescue Exception => e
+      puts "Error! Have you specified the correct port? Or maybe there's a problem with the code..."
     end
 
-    # catch the basic errors
-  rescue SocketError => e
-    puts "Socket Error! Is your domain name correct?"
-  rescue Net::SSH::AuthenticationFailed
-    puts "Authentication Error! Did you correctly type in your username and password?"
-  rescue Exception => e
-    puts "Error! Have you specified the correct port? Or maybe there's a problem with the code..."
   end
 
 end
