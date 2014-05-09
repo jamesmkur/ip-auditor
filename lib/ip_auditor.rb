@@ -61,7 +61,7 @@ module IpAuditor
   # prompt for and return password
   def IpAuditor.get_password
     if STDIN.respond_to?(:noecho)
-      puts "Password: "
+      print "Password: "
       STDIN.noecho(&:gets).chomp
     else
       `read -s -p "Password: " password; echo $password`.chomp
@@ -71,7 +71,7 @@ module IpAuditor
   # get and parse the yaml passenger config file if available, else return false
   def IpAuditor.get_passenger_file(ssh,file_name)
 
-    puts "Getting passenger information for #{file_name}..." if @options.verbose
+    puts "Finding passenger information for #{file_name}..." if @options.verbose
 
     yaml_file = ssh.exec!("find /etc/passenger.d -name '#{file_name}.yml' -exec cat {} \\;")
 
@@ -81,7 +81,11 @@ module IpAuditor
     else
       begin
         content = YAML.load(yaml_file)
+      rescue Psych::SyntaxError
+        puts "No passenger data." if @options.verbose
+        return false
       rescue ArgumentError
+        puts "No passenger data." if @options.verbose
         return false
       end
     end
@@ -104,11 +108,14 @@ module IpAuditor
 
     # only return info if we're looking for this environment. Return false if rails info exists but
     # we should ignore this environment, nil if there is no rails info
-    if rails_info && (rails_info['environment'][@options.environment] || @options.environment == 'all')
-      rails_info['rails_version'] = get_rails_version(ssh,rails_info['rvm'])
-      return rails_info
-    elsif rails_info
-      return false
+    if rails_info
+
+      if (!rails_info['environment'].nil? && rails_info['environment'][@options.environment]) || @options.environment == 'all'
+        rails_info['rails_version'] = get_rails_version(ssh,rails_info['rvm'])
+        return rails_info
+      else
+        return false
+      end
     else
       return nil
     end
@@ -182,6 +189,8 @@ module IpAuditor
         virtual_host = line[/<VirtualHost/] ? line[/<VirtualHost (.*)>/,1].strip.split(" ").join(", ") : ''
         directory = ''
         domain_statuses = []
+
+        puts "Getting vhost information for #{current_file}..." if @options.verbose
 
       end
     end
@@ -280,5 +289,4 @@ module IpAuditor
     end
 
   end
-
 end
