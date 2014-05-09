@@ -132,7 +132,7 @@ module IpAuditor
 
     # output IP address or message saying lookup failed
     if ip
-      return ip
+      return ip.strip
     else
       return 'DOMAIN LOOKUP FAILED'
     end

@@ -2,7 +2,17 @@
 
 The IP Auditor looks through your Apache vhosts to compile a list of apps on the server, what domains are being listened for and what IP each domain is actually pointing to.
 
+If passenger is installed, it also lists where the rails apps are located and what rvm gemset / rails version they are using.
+
 This allows you to quickly track which domains and apps are active and which are pointing elsewhere.
+
+## Assumptions
+
+* RVM is installed on the server, and the bin path is /usr/local/rvm/bin/rvm
+* Apache vhost files are located in /etc/apache2/site-enabled/
+* Apache vhost files follow the "site-name.com" convention
+* If passenger is installed, site config files are stored in /etc/passenger.d/
+* Passenger files follow the "site-name.com.yml" convention
 
 ## Installation
 
@@ -21,20 +31,47 @@ This allows you to quickly track which domains and apps are active and which are
 
 Examples:
 
+	Basic usage:
 	audit_ips someserver.com my_user -p 8080
 
-## Output
+	Print to "IP Audit - someserver.com.csv":
+	audit_ips someserver.com my_user -p 8080 -c
+
+	Print to "IP Audit - my audit.csv":
+	audit_ips someserver.com my_user -p 8080 -c "my audit"
+
+## Terminal Output
 
 The Auditor will return a crude report for each VirtualHost in the following format.
 
 	============
-	/path/to/vhost/vhostname: <VirtualHost  [IP]:[port]>
+	[Site Name]
 	============
+	[Rails Environment]
+	[Directory]
+	[Gemset]
+	[Rails Version]
+	[Virtual Host (IP:port)]
+
+	------------
+	Site Statuses
+	------------
 	[domain-1]
 	[IP domain-1 is actually pointing to]
+
 	[domain-2]
 	[IP domain-2 is actually pointing to]
-	[/path/to/app/DocumentRoot]
+
+	etc.
+
+## CSV Output
+
+If the -c flag is set, Auditor will create a .csv file instead of printing data to the terminal.
+
+The csv file will have the following columns:
+Site, Environment, Directory, Gemset, Rails Version, Virtual Host, Site Statuses
+
+The Site Statuses column will actually just be the begnning of a list of sites and the IP's they are pointing to.
 
 ## Contributing
 
@@ -42,13 +79,13 @@ Pull requests are welcome!
 
 To build and run gem locally:
 
-* build gem  
+* build gem
 `gem build ip_auditor.gemspec`
-	
-* uninstall old version  
+
+* uninstall old version
 `gem uninstall ip_auditor`
-		
-* install from local build  
+
+* install from local build
 `gem install ip_auditor-0.0.2.gem`
 
 ## License
