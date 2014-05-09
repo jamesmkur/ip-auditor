@@ -10,8 +10,6 @@ This allows you to quickly track which domains and apps are active and which are
 
 ## Usage
 
-To use the Auditor, cd into the cloned repo and run the following command:
-
 	audit_ips [server name/IP] [user] [options]
 
 ## Options
