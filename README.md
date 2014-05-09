@@ -6,19 +6,24 @@ This allows you to quickly track which domains and apps are active and which are
 
 ## Installation
 
-* clone this repo
-* cd into the repo
-* run `bundle install`
+	gem install ip_auditor
 
 ## Usage
 
 To use the Auditor, cd into the cloned repo and run the following command:
 
-	ruby ./lib/ip_auditor.rb [server name/IP] [user] [options]
+	audit_ips [server name/IP] [user] [options]
 
-Example:
+## Options
 
-	ruby ./lib/ip_auditor.rb someserver.com myuser
+* -p [PORT NUMBER] : Specify a port number (default is 22)
+* -c [FILE NAME (optional)]: Output to .csv file instead of terminal (can specify a name)
+* -v : Output more information as to what's happening
+* -e [prod|stage|dev|etc.]: Specify an environment to output (defaults to 'all'; determined by passenger config files, so non-rails site will always return)
+
+Examples:
+
+	audit_ips someserver.com my_user -p 8080
 
 ## Output
 
@@ -33,12 +38,20 @@ The Auditor will return a crude report for each VirtualHost in the following for
 	[IP domain-2 is actually pointing to]
 	[/path/to/app/DocumentRoot]
 
-## Options
+## Contributing
 
-* -p [PORT NUMBER] : Specify a port number (default is 22)
-* -c [FILE NAME (optional)]: Output to .csv file instead of terminal (can specify a name)
-* -v : Output more information as to what's happening
-* -e [prod|stage|dev|etc.]: Specify an environment to output (defaults to 'all'; determined by passenger config files, so non-rails site will always return)
+Pull requests are welcome!
+
+To build and run gem locally:
+
+* build gem  
+`gem build ip_auditor.gemspec`
+	
+* uninstall old version  
+`gem uninstall ip_auditor`
+		
+* install from local build  
+`gem install ip_auditor-0.0.2.gem`
 
 ## License
 
