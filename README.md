@@ -4,7 +4,7 @@ The IP Auditor looks through your Apache vhosts to compile a list of apps on the
 
 If passenger is installed, it also lists where the rails apps are located and what rvm gemset / rails version they are using.
 
-This allows you to quickly track which domains and apps are active and which are pointing elsewhere.
+This allows you to quickly track which domains and apps are active and which are pointing elsewhere. 
 
 ## Assumptions
 
@@ -24,10 +24,12 @@ This allows you to quickly track which domains and apps are active and which are
 
 ## Options
 
-* -p [PORT NUMBER] : Specify a port number (default is 22)
+* -p [PORT NUMBER] : Specify a port number
+  * default: 22
 * -c [FILE NAME (optional)]: Output to .csv file instead of terminal (can specify a name)
 * -v : Output more information as to what's happening
-* -e [prod|stage|dev|etc.]: Specify an environment to output (defaults to 'all'; determined by passenger config files, so non-rails site will always return)
+* -e [prod|stage|dev|etc.]: Specify an environment to output
+  * default: 'all'; determined by passenger config files, so non-rails site will always return
 
 Examples:
 
